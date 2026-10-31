@@ -3,14 +3,12 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Control de Códigos y Ruteros - Supabase</title>
+    <title>Control de Códigos y Ruteros - Local</title>
     <!-- Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
     <!-- Librerías jsPDF y AutoTable para reportes en PDF -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.8.2/jspdf.plugin.autotable.min.js"></script>
-    <!-- Supabase Client -->
-    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 </head>
 <body class="bg-slate-100 text-slate-800 min-h-screen p-4 md:p-8">
 
@@ -19,7 +17,7 @@
         <!-- Encabezado -->
         <header class="bg-white shadow-md rounded-xl p-6 flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
             <div>
-                <h1 class="text-xl font-bold text-slate-900">Registro de Códigos y Ruteros</h1>
+                <h1 class="text-xl font-bold text-slate-900">Registro de Códigos y Ruteros (Local)</h1>
                 <p id="lblRuteroActivo" class="text-sm text-blue-600 font-semibold mt-1"></p>
             </div>
             <div class="flex items-center gap-2 flex-wrap">
@@ -29,7 +27,7 @@
                 <button onclick="descargarPDFPorRutero()" class="bg-rose-600 hover:bg-rose-700 text-white text-xs font-medium py-2 px-3 rounded-lg transition-colors cursor-pointer shadow">
                     Descargar PDF por Rutero
                 </button>
-                <button onclick="limpiarDia()" class="bg-amber-600 hover:bg-amber-700 text-white text-xs font-medium py-2 px-3 rounded-lg transition-colors cursor-pointer" title="Borra todos los registros de la nube">
+                <button onclick="limpiarDia()" class="bg-amber-600 hover:bg-amber-700 text-white text-xs font-medium py-2 px-3 rounded-lg transition-colors cursor-pointer" title="Borra todos los registros guardados">
                     🗑️ Limpiar Día
                 </button>
                 <button onclick="cambiarRutero()" id="btnCambiar" class="hidden text-xs bg-slate-200 hover:bg-slate-300 px-3 py-2 rounded-lg font-medium transition-colors cursor-pointer">
@@ -48,7 +46,7 @@
             <div class="bg-indigo-600 text-white p-4 rounded-xl shadow flex justify-between items-center">
                 <div>
                     <span class="text-xs uppercase tracking-wider text-indigo-200 block">Suma Total General Acumulada</span>
-                    <span class="text-xs text-indigo-100">Suma de todos los precios en la base de datos</span>
+                    <span class="text-xs text-indigo-100">Suma de todos los precios registrados</span>
                 </div>
                 <div class="text-2xl font-black" id="txtSumaGeneral">Q 0.00</div>
             </div>
@@ -73,7 +71,7 @@
         <!-- PASO 1: Ingresar Nombre del Rutero -->
         <div id="pantallaRutero" class="bg-white shadow-md rounded-xl p-8 max-w-md mx-auto text-center">
             <h2 class="text-lg font-bold mb-2">Nombre del Rutero</h2>
-            <p class="text-xs text-slate-500 mb-4">Ingresa el nombre o destino para comenzar a escanear.</p>
+            <p class="text-xs text-slate-500 mb-4">Ingresa el nombre o destino para comenzar a registrar.</p>
             
             <input type="text" id="txtRutero" placeholder="Ej. Ruta Norte - Local 3" autofocus
                 class="w-full border border-slate-300 rounded-lg px-4 py-2.5 text-sm mb-4 text-center font-medium focus:ring-2 focus:ring-blue-500 focus:outline-none">
@@ -84,16 +82,16 @@
             </button>
         </div>
 
-        <!-- PASO 2: Panel de Escaneo -->
+        <!-- PASO 2: Panel de Captura y Teclado -->
         <div id="pantallaApp" class="hidden space-y-6">
             
             <div class="bg-white shadow-md rounded-xl p-6 border-l-4 border-blue-600">
-                <h2 class="text-sm font-semibold mb-3 text-slate-700">Escanear Código y Precio (Opcional)</h2>
+                <h2 class="text-sm font-semibold mb-3 text-slate-700">Registrar Código (Escáner o Teclado) y Precio (Opcional)</h2>
                 
                 <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
                     <div>
-                        <label class="block text-xs font-medium text-slate-500 mb-1">Código de Barras</label>
-                        <input type="text" id="txtCodigo" placeholder="Escanee aquí..." 
+                        <label class="block text-xs font-medium text-slate-500 mb-1">Código (Escribe o Escanea)</label>
+                        <input type="text" id="txtCodigo" placeholder="Escribe o escanea aquí..." 
                             class="w-full border border-slate-300 rounded-lg px-3 py-2 text-sm font-mono focus:ring-2 focus:ring-blue-500 focus:outline-none">
                     </div>
                     <div>
@@ -104,7 +102,7 @@
                     <div class="flex items-end">
                         <button onclick="guardarRegistro()" 
                             class="w-full bg-blue-600 hover:bg-blue-700 text-white font-medium py-2 px-4 rounded-lg text-sm shadow transition-colors cursor-pointer">
-                            Guardar en Supabase
+                            Guardar Registro
                         </button>
                     </div>
                 </div>
@@ -129,7 +127,7 @@
                             </tr>
                         </thead>
                         <tbody id="tablaCuerpo" class="text-sm divide-y divide-slate-100">
-                            <!-- Datos cargados desde Supabase -->
+                            <!-- Datos locales -->
                         </tbody>
                     </table>
                 </div>
@@ -139,18 +137,11 @@
 
     </div>
 
-    <!-- Lógica de Supabase y la Aplicación -->
+    <!-- Lógica JavaScript Local -->
     <script>
-        // TUS CREDENCIALES EXACTAS CONFIGURADAS
-        const SUPABASE_URL = 'https://inllvdgrkvwnroforxdw.supabase.co';
-        const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImlubGx2ZGdya3Z3bnJvZm9yeGR3Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3OTM0MTgyMjcsImV4cCI6MjEwODk5NDIyN30.aAbUTrvBcNeb6kzR7FdyEneCCU9bs86h6sR1ot0QwVM';
-        
-        const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
-
         let ruteroActual = "";
-        let listaGlobal = [];
 
-        window.onload = async function() {
+        window.onload = function() {
             let guardado = localStorage.getItem('rutero_activo');
             if (guardado && guardado.trim() !== "") {
                 ruteroActual = guardado;
@@ -163,11 +154,18 @@
                 if (e.key === 'Enter') iniciarApp();
             });
 
+            // Atajos de teclado fluidos con Enter
             document.getElementById('txtCodigo').addEventListener('keypress', function(e) {
-                if (e.key === 'Enter') document.getElementById('txtPrecio').focus();
+                if (e.key === 'Enter') {
+                    e.preventDefault();
+                    document.getElementById('txtPrecio').focus();
+                }
             });
             document.getElementById('txtPrecio').addEventListener('keypress', function(e) {
-                if (e.key === 'Enter') guardarRegistro();
+                if (e.key === 'Enter') {
+                    e.preventDefault();
+                    guardarRegistro();
+                }
             });
         };
 
@@ -186,12 +184,12 @@
             mostrarPanelPrincipal();
         }
 
-        async function mostrarPanelPrincipal() {
+        function mostrarPanelPrincipal() {
             document.getElementById('pantallaRutero').style.display = 'none';
             document.getElementById('pantallaApp').style.display = 'block';
             document.getElementById('btnCambiar').style.display = 'inline-block';
             document.getElementById('lblRuteroActivo').innerText = "Rutero Actual: " + ruteroActual;
-            await cargarTabla();
+            cargarTabla();
             
             setTimeout(() => {
                 let codInput = document.getElementById('txtCodigo');
@@ -206,19 +204,15 @@
             }
         }
 
-        async function limpiarDia() {
-            if (confirm("¿Estás seguro de borrar TODOS los registros de la base de datos en Supabase? Esta acción no se puede deshacer.")) {
-                const { error } = await supabaseClient.from('registros_codigos').delete().neq('id', 0);
-                if (error) {
-                    alert("Error al limpiar la base de datos: " + error.message);
-                } else {
-                    localStorage.removeItem('rutero_activo');
-                    location.reload();
-                }
+        function limpiarDia() {
+            if (confirm("¿Estás seguro de borrar TODOS los registros guardados? Esta acción no se puede deshacer.")) {
+                localStorage.removeItem('registros_codigos');
+                localStorage.removeItem('rutero_activo');
+                location.reload();
             }
         }
 
-        async function guardarRegistro() {
+        function guardarRegistro() {
             let codigoElem = document.getElementById('txtCodigo');
             let precioElem = document.getElementById('txtPrecio');
             
@@ -228,18 +222,16 @@
             let fecha = new Date().toLocaleString();
 
             if (codigo === "") {
-                alert("El código de barras no puede estar vacío.");
+                alert("El código no puede estar vacío.");
                 codigoElem.focus();
                 return;
             }
 
-            let { data: existentes, error } = await supabaseClient
-                .from('registros_codigos')
-                .select('*')
-                .eq('codigo', codigo);
+            let lista = JSON.parse(localStorage.getItem('registros_codigos')) || [];
 
-            if (existentes && existentes.length > 0) {
-                let repetido = existentes[0];
+            // Detector estricto de códigos repetidos
+            let repetido = lista.find(item => item.codigo === codigo);
+            if (repetido) {
                 document.getElementById('txtMensajeRepetido').innerText = `El código "${codigo}" ya fue registrado en el rutero "${repetido.rutero}" el ${repetido.fecha}. No se guardará.`;
                 document.getElementById('alertaRepetido').style.display = 'flex';
                 
@@ -252,46 +244,30 @@
             }
 
             let nuevo = { id: Date.now(), fecha, codigo, rutero: ruteroActual, precio };
-
-            let { error: insertError } = await supabaseClient
-                .from('registros_codigos')
-                .insert([nuevo]);
-
-            if (insertError) {
-                alert("Error al guardar en Supabase: " + insertError.message);
-                return;
-            }
+            lista.unshift(nuevo);
+            
+            localStorage.setItem('registros_codigos', JSON.stringify(lista));
 
             codigoElem.value = "";
             precioElem.value = "";
             codigoElem.focus();
 
-            await cargarTabla();
+            cargarTabla();
         }
 
         function cerrarAlerta() {
             document.getElementById('alertaRepetido').style.display = 'none';
         }
 
-        async function cargarTabla() {
+        function cargarTabla() {
             let tbody = document.getElementById('tablaCuerpo');
             let busquedaElem = document.getElementById('txtBusqueda');
             let busqueda = busquedaElem ? busquedaElem.value.toLowerCase() : "";
             
-            let { data: lista, error } = await supabaseClient
-                .from('registros_codigos')
-                .select('*')
-                .order('id', { ascending: false });
-
-            if (error) {
-                console.error("Error al cargar datos:", error);
-                return;
-            }
-
-            listaGlobal = lista || [];
+            let lista = JSON.parse(localStorage.getItem('registros_codigos')) || [];
             tbody.innerHTML = "";
 
-            let filtrados = listaGlobal.filter(item => 
+            let filtrados = lista.filter(item => 
                 item.codigo.toLowerCase().includes(busqueda) || 
                 item.rutero.toLowerCase().includes(busqueda)
             );
@@ -318,45 +294,32 @@
             });
         }
 
-        async function editarPrecio(id) {
-            let item = listaGlobal.find(i => i.id === id);
+        function editarPrecio(id) {
+            let lista = JSON.parse(localStorage.getItem('registros_codigos')) || [];
+            let item = lista.find(i => i.id === id);
             if (!item) return;
 
             let nuevoPrecio = prompt(`Ingrese el nuevo precio para el código ${item.codigo}:`, item.precio === "0.00" ? "" : item.precio);
             if (nuevoPrecio !== null) {
                 let precioLimpio = nuevoPrecio.trim();
-                let precioFinal = precioLimpio !== "" ? parseFloat(precioLimpio).toFixed(2) : "0.00";
-
-                let { error } = await supabaseClient
-                    .from('registros_codigos')
-                    .update({ precio: precioFinal })
-                    .eq('id', id);
-
-                if (error) {
-                    alert("Error al actualizar: " + error.message);
-                } else {
-                    await cargarTabla();
-                }
+                item.precio = precioLimpio !== "" ? parseFloat(precioLimpio).toFixed(2) : "0.00";
+                localStorage.setItem('registros_codigos', JSON.stringify(lista));
+                cargarTabla();
             }
         }
 
-        async function eliminar(id) {
+        function eliminar(id) {
             if (confirm("¿Estás seguro de eliminar este registro?")) {
-                let { error } = await supabaseClient
-                    .from('registros_codigos')
-                    .delete()
-                    .eq('id', id);
-
-                if (error) {
-                    alert("Error al eliminar: " + error.message);
-                } else {
-                    await cargarTabla();
-                }
+                let lista = JSON.parse(localStorage.getItem('registros_codigos')) || [];
+                lista = lista.filter(item => item.id !== id);
+                localStorage.setItem('registros_codigos', JSON.stringify(lista));
+                cargarTabla();
             }
         }
 
         function mostrarResumenTotal() {
-            if (listaGlobal.length === 0) {
+            let lista = JSON.parse(localStorage.getItem('registros_codigos')) || [];
+            if (lista.length === 0) {
                 alert("No hay registros para calcular totales.");
                 return;
             }
@@ -364,7 +327,7 @@
             let resumen = {};
             let sumaGeneral = 0;
 
-            listaGlobal.forEach(item => {
+            lista.forEach(item => {
                 let precioNum = parseFloat(item.precio);
                 sumaGeneral += precioNum;
 
@@ -400,13 +363,14 @@
         }
 
         function descargarPDFPorRutero() {
-            if (listaGlobal.length === 0) {
+            let lista = JSON.parse(localStorage.getItem('registros_codigos')) || [];
+            if (lista.length === 0) {
                 alert("No hay datos para generar los reportes en PDF.");
                 return;
             }
 
             let ruterosMap = {};
-            listaGlobal.forEach(item => {
+            lista.forEach(item => {
                 if (!ruterosMap[item.rutero]) {
                     ruterosMap[item.rutero] = [];
                 }
@@ -456,7 +420,7 @@
                 count++;
             }
 
-            alert(`¡Se generaron y descargaron ${count} archivos PDF desde la nube de Supabase!`);
+            alert(`¡Se generaron y descargaron ${count} archivos PDF localmente!`);
         }
     </script>
 </body>
