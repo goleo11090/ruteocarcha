@@ -73,7 +73,7 @@
         <!-- PASO 1: Ingresar Nombre del Rutero -->
         <div id="pantallaRutero" class="bg-white shadow-md rounded-xl p-8 max-w-md mx-auto text-center">
             <h2 class="text-lg font-bold mb-2">Nombre del Rutero</h2>
-            <p class="text-xs text-slate-500 mb-4">Ingresa el nombre o destino para comenzar a escanear.</p>
+            <p class="text-xs text-slate-500 mb-4">Ingresa el nombre o destino para comenzar a registrar.</p>
             
             <input type="text" id="txtRutero" placeholder="Ej. Ruta Norte - Local 3" autofocus
                 class="w-full border border-slate-300 rounded-lg px-4 py-2.5 text-sm mb-4 text-center font-medium focus:ring-2 focus:ring-blue-500 focus:outline-none">
@@ -84,16 +84,16 @@
             </button>
         </div>
 
-        <!-- PASO 2: Panel de Escaneo -->
+        <!-- PASO 2: Panel de Captura y Teclado -->
         <div id="pantallaApp" class="hidden space-y-6">
             
             <div class="bg-white shadow-md rounded-xl p-6 border-l-4 border-blue-600">
-                <h2 class="text-sm font-semibold mb-3 text-slate-700">Escanear Código y Precio (Opcional)</h2>
+                <h2 class="text-sm font-semibold mb-3 text-slate-700">Registrar Código (Escáner o Teclado) y Precio (Opcional)</h2>
                 
                 <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
                     <div>
-                        <label class="block text-xs font-medium text-slate-500 mb-1">Código de Barras</label>
-                        <input type="text" id="txtCodigo" placeholder="Escanee aquí..." 
+                        <label class="block text-xs font-medium text-slate-500 mb-1">Código (Escribe o Escanea)</label>
+                        <input type="text" id="txtCodigo" placeholder="Escribe o escanea aquí..." 
                             class="w-full border border-slate-300 rounded-lg px-3 py-2 text-sm font-mono focus:ring-2 focus:ring-blue-500 focus:outline-none">
                     </div>
                     <div>
@@ -141,9 +141,8 @@
 
     <!-- Lógica de Supabase y la Aplicación -->
     <script>
-        // TUS CREDENCIALES EXACTAS CONFIGURADAS
         const SUPABASE_URL = 'https://inllvdgrkvwnroforxdw.supabase.co';
-        const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImlubGx2ZGdya3Z3bnJvZm9yeGR3Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3OTM0MTgyMjcsImV4cCI6MjEwODk5NDIyN30.aAbUTrvBcNeb6kzR7FdyEneCCU9bs86h6sR1ot0QwVM';
+        const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImlubGx2ZGdya3Z3bnJvZm9yeGR3Iicm9sZSI6ImFub24iLCJpYXQiOjE3OTM0MTgyMjcsImV4cCI6MjEwODk5NDIyN30.aAbUTrvBcNeb6kzR7FdyEneCCU9bs86h6sR1ot0QwVM';
         
         const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
@@ -163,11 +162,18 @@
                 if (e.key === 'Enter') iniciarApp();
             });
 
+            // Atajos de teclado fluidos con Enter
             document.getElementById('txtCodigo').addEventListener('keypress', function(e) {
-                if (e.key === 'Enter') document.getElementById('txtPrecio').focus();
+                if (e.key === 'Enter') {
+                    e.preventDefault();
+                    document.getElementById('txtPrecio').focus();
+                }
             });
             document.getElementById('txtPrecio').addEventListener('keypress', function(e) {
-                if (e.key === 'Enter') guardarRegistro();
+                if (e.key === 'Enter') {
+                    e.preventDefault();
+                    guardarRegistro();
+                }
             });
         };
 
@@ -228,7 +234,7 @@
             let fecha = new Date().toLocaleString();
 
             if (codigo === "") {
-                alert("El código de barras no puede estar vacío.");
+                alert("El código no puede estar vacío.");
                 codigoElem.focus();
                 return;
             }
