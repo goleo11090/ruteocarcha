@@ -1,0 +1,152 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Registro de Códigos - Ruteros y Precios</title>
+    <!-- Tailwind CSS para un diseño limpio y moderno -->
+    <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-slate-100 text-slate-800 min-h-screen p-4 md:p-8">
+
+    <div class="max-w-4xl mx-auto">
+        <!-- Encabezado -->
+        <header class="bg-white shadow-md rounded-xl p-6 mb-6">
+            <h1 class="text-2xl font-bold text-slate-900 mb-1">Registro de Códigos</h1>
+            <p class="text-sm text-slate-500">Control de códigos de barras, asignación de ruteros y precios.</p>
+        </header>
+
+        <!-- Formulario de Registro -->
+        <div class="bg-white shadow-md rounded-xl p-6 mb-6">
+            <h2 class="text-lg font-semibold mb-4 text-slate-700">Nuevo Registro</h2>
+            <form id="codeForm" class="grid grid-cols-1 md:grid-cols-4 gap-4">
+                <div>
+                    <label class="block text-xs font-medium text-slate-600 mb-1">Código de Barras</label>
+                    <input type="text" id="codigo" required placeholder="Ej. 7501001300..." 
+                        class="w-full border border-slate-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-blue-500 focus:outline-none">
+                </div>
+                <div>
+                    <label class="block text-xs font-medium text-slate-600 mb-1">Rutero / Ruta</label>
+                    <input type="text" id="rutero" required placeholder="Ej. Ruta Norte - Local 3" 
+                        class="w-full border border-slate-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-blue-500 focus:outline-none">
+                </div>
+                <div>
+                    <label class="block text-xs font-medium text-slate-600 mb-1">Precio (Q)</label>
+                    <input type="number" step="0.01" id="precio" required placeholder="0.00" 
+                        class="w-full border border-slate-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-blue-500 focus:outline-none">
+                </div>
+                <div class="flex items-end">
+                    <button type="submit" 
+                        class="w-full bg-blue-600 hover:bg-blue-700 text-white font-medium py-2 px-4 rounded-lg text-sm transition-colors shadow">
+                        Guardar Registro
+                    </button>
+                </div>
+            </form>
+        </div>
+
+        <!-- Tabla de Registros -->
+        <div class="bg-white shadow-md rounded-xl p-6 overflow-hidden">
+            <div class="flex justify-between items-center mb-4">
+                <h2 class="text-lg font-semibold text-slate-700">Registros Guardados</h2>
+                <button onclick="exportarCSV()" class="bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-medium py-2 px-3 rounded-lg transition-colors">
+                    Exportar a CSV / Excel
+                </button>
+            </div>
+            <div class="overflow-x-auto">
+                <table class="w-full text-left border-collapse">
+                    <thead>
+                        <tr class="bg-slate-50 border-b border-slate-200 text-xs font-semibold text-slate-600 uppercase">
+                            <th class="py-3 px-4">Fecha / Hora</th>
+                            <th class="py-3 px-4">Código de Barras</th>
+                            <th class="py-3 px-4">Rutero</th>
+                            <th class="py-3 px-4 text-right">Precio</th>
+                            <th class="py-3 px-4 text-center">Acciones</th>
+                        </tr>
+                    </thead>
+                    <tbody id="tablaRegistros" class="text-sm divide-y divide-slate-100">
+                        <!-- Los datos se cargan dinámicamente aquí -->
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <!-- Script de Funcionalidad -->
+    <script>
+        document.addEventListener('DOMContentLoaded', cargarRegistros);
+
+        const form = document.getElementById('codeForm');
+        form.addEventListener('submit', function(e) {
+            e.preventDefault();
+            
+            const codigo = document.getElementById('codigo').value.trim();
+            const rutero = document.getElementById('rutero').value.trim();
+            const precio = parseFloat(document.getElementById('precio').value).toFixed(2);
+            const fecha = new Date().toLocaleString();
+
+            const nuevoRegistro = { id: Date.now(), fecha, codigo, rutero, precio };
+
+            let registros = JSON.parse(localStorage.getItem('registros_codigos')) || [];
+            registros.unshift(nuevoRegistro); // Agregar al inicio
+            localStorage.setItem('registros_codigos', JSON.stringify(registros));
+
+            form.reset();
+            document.getElementById('codigo').focus();
+            cargarRegistros();
+        });
+
+        function cargarRegistros() {
+            const tbody = document.getElementById('tablaRegistros');
+            const registros = JSON.parse(localStorage.getItem('registros_codigos')) || [];
+            
+            tbody.innerHTML = '';
+            if (registros.length === 0) {
+                tbody.innerHTML = `<tr><td colspan="5" class="py-4 text-center text-slate-400 text-sm">No hay registros guardados todavía.</td></tr>`;
+                return;
+            }
+
+            registros.forEach(reg => {
+                const tr = document.createElement('tr');
+                tr.innerHTML = `
+                    <td class="py-3 px-4 text-slate-500 text-xs">${reg.fecha}</td>
+                    <td class="py-3 px-4 font-mono font-medium text-slate-800">${reg.codigo}</td>
+                    <td class="py-3 px-4 text-slate-700">${reg.rutero}</td>
+                    <td class="py-3 px-4 text-right font-medium text-slate-900">Q ${reg.precio}</td>
+                    <td class="py-3 px-4 text-center">
+                        <button onclick="eliminarRegistro(${reg.id})" class="text-red-500 hover:text-red-700 text-xs font-medium">Eliminar</button>
+                    </td>
+                `;
+                tbody.appendChild(tr);
+            });
+        }
+
+        function eliminarRegistro(id) {
+            let registros = JSON.parse(localStorage.getItem('registros_codigos')) || [];
+            registros = registros.filter(reg => reg.id !== id);
+            localStorage.setItem('registros_codigos', JSON.stringify(registros));
+            cargarRegistros();
+        }
+
+        function exportarCSV() {
+            const registros = JSON.parse(localStorage.getItem('registros_codigos')) || [];
+            if (registros.length === 0) {
+                alert("No hay datos para exportar.");
+                return;
+            }
+
+            let csvContent = "data:text/csv;charset=utf-8,Fecha,Codigo,Rutero,Precio\n";
+            registros.forEach(reg => {
+                csvContent += `"${reg.fecha}","${reg.codigo}","${reg.rutero}","${reg.precio}"\n`;
+            });
+
+            const encodedUri = encodeURI(csvContent);
+            const link = document.createElement("a");
+            link.setAttribute("href", encodedUri);
+            link.setAttribute("download", "reporte_codigos_ruteros.csv");
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+        }
+    </script>
+</body>
+</html>
