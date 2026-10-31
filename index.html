@@ -141,9 +141,9 @@
 
     <!-- Lógica de Supabase y la Aplicación -->
     <script>
-        // TUS CREDENCIALES EXACTAS DE SUPABASE CONFIGURADAS
-        const SUPABASE_URL = 'https://inllvdgrkvwnroforxdw.supabase.co';
-        const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImlubGx2ZGdya3Z3bnJvZm9yeGR3Iicm9sZSI6ImFub24iLCJpYXQiOjE3OTM0MTgyMjcsImV4cCI6MjEwODk5NDIyN30.aAbUTrvBcNeb6kzR7FdyEneCCU9bs86h6sR1ot0QwVM';
+        // Credenciales oficiales de Supabase configuradas con limpieza de espacios
+        const SUPABASE_URL = 'https://inllvdgrkvwnroforxdw.supabase.co'.trim();
+        const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImlubGx2ZGdya3Z3bnJvZm9yeGR3Iicm9sZSI6ImFub24iLCJpYXQiOjE3OTM0MTgyMjcsImV4cCI6MjEwODk5NDIyN30.aAbUTrvBcNeb6kzR7FdyEneCCU9bs86h6sR1ot0QwVM'.trim();
         
         const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
@@ -163,7 +163,6 @@
                 if (e.key === 'Enter') iniciarApp();
             });
 
-            // Atajos de teclado fluidos con Enter
             document.getElementById('txtCodigo').addEventListener('keypress', function(e) {
                 if (e.key === 'Enter') {
                     e.preventDefault();
