@@ -4,6 +4,9 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Registro de Códigos - Ruteros y Precios</title>
+    <!-- Vínculo al archivo Web Manifest para convertirlo en App instalable -->
+    <link rel="manifest" href="manifest.json">
+    <meta name="theme-color" content="#2563eb">
     <!-- Tailwind CSS para un diseño limpio y moderno -->
     <script src="https://cdn.tailwindcss.com"></script>
 </head>
@@ -22,7 +25,7 @@
             <form id="codeForm" class="grid grid-cols-1 md:grid-cols-4 gap-4">
                 <div>
                     <label class="block text-xs font-medium text-slate-600 mb-1">Código de Barras</label>
-                    <input type="text" id="codigo" required placeholder="Ej. 7501001300..." 
+                    <input type="text" id="codigo" required placeholder="Ej. 7501001300..." autofocus
                         class="w-full border border-slate-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-blue-500 focus:outline-none">
                 </div>
                 <div>
@@ -73,7 +76,10 @@
 
     <!-- Script de Funcionalidad -->
     <script>
-        document.addEventListener('DOMContentLoaded', cargarRegistros);
+        document.addEventListener('DOMContentLoaded', () => {
+            cargarRegistros();
+            document.getElementById('codigo').focus();
+        });
 
         const form = document.getElementById('codeForm');
         form.addEventListener('submit', function(e) {
@@ -87,7 +93,7 @@
             const nuevoRegistro = { id: Date.now(), fecha, codigo, rutero, precio };
 
             let registros = JSON.parse(localStorage.getItem('registros_codigos')) || [];
-            registros.unshift(nuevoRegistro); // Agregar al inicio
+            registros.unshift(nuevoRegistro); 
             localStorage.setItem('registros_codigos', JSON.stringify(registros));
 
             form.reset();
